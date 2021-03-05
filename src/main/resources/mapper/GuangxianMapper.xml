@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="mapper.GuangxianMapper">
+  <resultMap id="BaseResultMap" type="com.unicom.excelforunicom.business.common.model.Guangxian">
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="guangLan" jdbcType="VARCHAR" property="guanglan" />
+    <result column="xianXinCount" jdbcType="VARCHAR" property="xianxincount" />
+    <result column="xianXinFirst" jdbcType="VARCHAR" property="xianxinfirst" />
+    <result column="xianXinLast" jdbcType="VARCHAR" property="xianxinlast" />
+    <result column="ODF_Name" jdbcType="VARCHAR" property="odfName" />
+    <result column="pan" jdbcType="VARCHAR" property="pan" />
+    <result column="panFirst" jdbcType="VARCHAR" property="panfirst" />
+    <result column="panLast" jdbcType="VARCHAR" property="panlast" />
+    <result column="ruJiaoXinxi" jdbcType="VARCHAR" property="rujiaoxinxi" />
+    <result column="ru_Mian" jdbcType="VARCHAR" property="ruMian" />
+    <result column="ru_Pan" jdbcType="VARCHAR" property="ruPan" />
+    <result column="ru_PanFirst" jdbcType="VARCHAR" property="ruPanfirst" />
+    <result column="ru_PanLast" jdbcType="VARCHAR" property="ruPanlast" />
+  </resultMap>
+</mapper>

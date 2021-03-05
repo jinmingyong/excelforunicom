@@ -1,0 +1,3 @@
+IDEA可使用，使用方法(报错不用在意，放到下面说的文件夹后就不会报错了。注意不要删除里面的包！！)
+    把文件放到最下方的Scratches and Consoles--Extensions--Database Tools and SQL--schema下
+    在IDEA的数据库工具中选择要生成实体类的表，右键选择Scripted Extensions，选择这个文件则可

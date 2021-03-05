@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="mapper.TestMapper">
+  <resultMap id="BaseResultMap" type="com.unicom.excelforunicom.business.common.model.Test">
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <id column="序号" jdbcType="VARCHAR" property="序号" />
+    <result column="姓名" jdbcType="VARCHAR" property="姓名" />
+    <result column="年龄" jdbcType="VARCHAR" property="年龄" />
+    <result column="内容" jdbcType="VARCHAR" property="内容" />
+  </resultMap>
+</mapper>

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="mapper.ZyfxMapper">
+  <resultMap id="BaseResultMap" type="com.unicom.excelforunicom.business.common.model.Zyfx">
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <id column="duanZiMingCheng" jdbcType="VARCHAR" property="duanzimingcheng" />
+    <result column="guangLan" jdbcType="VARCHAR" property="guanglan" />
+    <result column="xianXin" jdbcType="VARCHAR" property="xianxin" />
+    <result column="zhuangTai" jdbcType="VARCHAR" property="zhuangtai" />
+    <result column="dzmc" jdbcType="VARCHAR" property="dzmc" />
+    <result column="zhuanYe" jdbcType="VARCHAR" property="zhuanye" />
+    <result column="yeWuLeiBie" jdbcType="VARCHAR" property="yewuleibie" />
+    <result column="yeWuHao" jdbcType="VARCHAR" property="yewuhao" />
+    <result column="yeWuMing" jdbcType="VARCHAR" property="yewuming" />
+    <result column="biaoQian" jdbcType="VARCHAR" property="biaoqian" />
+    <result column="duiYingWeizhi" jdbcType="VARCHAR" property="duiyingweizhi" />
+    <result column="tiaoJieWeizhi" jdbcType="VARCHAR" property="tiaojieweizhi" />
+    <result column="guangJiaoWeizhi" jdbcType="VARCHAR" property="guangjiaoweizhi" />
+    <result column="guangJiaoTiaojie" jdbcType="VARCHAR" property="guangjiaotiaojie" />
+    <result column="PeiXianGuangLanMingCheng" jdbcType="VARCHAR" property="peixianguanglanmingcheng" />
+    <result column="bianGengRiQi" jdbcType="TIMESTAMP" property="biangengriqi" />
+    <result column="sheBeiMingCheng" jdbcType="VARCHAR" property="shebeimingcheng" />
+    <result column="MoKuaiMing" jdbcType="VARCHAR" property="mokuaiming" />
+    <result column="pan" jdbcType="VARCHAR" property="pan" />
+    <result column="juZhan" jdbcType="VARCHAR" property="juzhan" />
+    <result column="jiFang" jdbcType="VARCHAR" property="jifang" />
+    <result column="sheiBeiId" jdbcType="VARCHAR" property="sheibeiid" />
+    <result column="duanZiId" jdbcType="VARCHAR" property="duanziid" />
+  </resultMap>
+</mapper>
