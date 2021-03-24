@@ -37,7 +37,7 @@ spring:
     sharding:
       tables:
         zyfx:
-          actual-data-nodes: do1.zyfx_$->{["xjj","cjl","wjc","bcb","hy","dyxj","mlxd"]}
+          actual-data-nodes: do1.zyfx_$->{["xjj","cjl","wjc","bcb","hy","dyxj","mlxd","xym","nfq","wdd"]}
           table-strategy:
             standard:
               sharding-column: juZhan
@@ -61,7 +61,7 @@ swagger:
 mybatis:
   configuration:
     mapUnderscoreToCamelCase: true
-    interceptors: {com.unicom.excelforunicom.base.sharding.TableShardInterceptor}
+    interceptors: {com.unicom.excelforunicom.base.sharding.TableShardInterceptor,com.unicom.excelforunicom.base.sharding.selectTableShardInterceptor}
 
 #pagehelper分页插件
 pagehelper:
@@ -92,10 +92,10 @@ titles:
       - "配线光缆名称"
       - "变更日期"
       - ""
+      - ""
       - "设备名称"
       - "模块名称"
       - "盘"
-      - ""
       - ""
       - "端子名称1"
       - ""

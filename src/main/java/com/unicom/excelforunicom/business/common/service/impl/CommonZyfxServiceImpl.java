@@ -1,8 +1,9 @@
 package com.unicom.excelforunicom.business.common.service.impl;
 
+import com.unicom.excelforunicom.business.common.dao.CommonStatisticsZyfxDao;
 import com.unicom.excelforunicom.business.common.dao.CommonZyfxDao;
-import com.unicom.excelforunicom.business.common.model.Zyfx;
-import com.unicom.excelforunicom.business.common.model.ZyfxExcelTitle;
+import com.unicom.excelforunicom.business.common.dao.ZyfxDao;
+import com.unicom.excelforunicom.business.common.model.*;
 import com.unicom.excelforunicom.business.common.service.CommonZyfxService;
 import com.unicom.excelforunicom.business.common.need.AbstractMyService;
 import com.unicom.excelforunicom.utils.ExcelH_For_P;
@@ -10,29 +11,29 @@ import com.unicom.excelforunicom.utils.ExcelUtil;
 import org.apache.poi.hssf.usermodel.*;
 import org.apache.poi.ss.usermodel.FillPatternType;
 import org.apache.poi.ss.usermodel.IndexedColors;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.multipart.MultipartHttpServletRequest;
-import org.springframework.web.multipart.MultipartResolver;
-import org.springframework.web.multipart.commons.CommonsMultipartResolver;
 import tk.mybatis.mapper.entity.Example;
 
+import javax.annotation.Resource;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.xml.crypto.Data;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URLEncoder;
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
 * @author JMY
@@ -41,10 +42,14 @@ import java.util.List;
 @Service
 public class CommonZyfxServiceImpl extends AbstractMyService<Zyfx> implements CommonZyfxService {
 
-    @Autowired
+    @Resource
     private CommonZyfxDao commonZyfxDao;
+    @Resource
+    private ZyfxDao zyfxDao;
     @Autowired
     private ZyfxExcelTitle zyfxExcelTitle;
+    @Autowired
+    private CommonStatisticsZyfxDao commonStatisticsZyfxDao;
 
     @Override
     public PageInfo selectAllForPage(Integer pageNum, Integer pageSize) {
@@ -58,6 +63,14 @@ public class CommonZyfxServiceImpl extends AbstractMyService<Zyfx> implements Co
         Example example = new Example(Zyfx.class);
         example.createCriteria().andLike("duanZiMingCheng","%"+zyfxName+"%");
         return new PageInfo(commonZyfxDao.selectByExample(example));
+    }
+
+    @Override
+    public PageInfo<Zyfx> selectZyfxByJuZhan(String juZhan, Integer pageNum, Integer pageSize) {
+        PageHelper.startPage(pageNum, pageSize);
+        Example example = new Example(Zyfx.class);
+        example.createCriteria().andEqualTo("juZhan",juZhan);
+        return new PageInfo(zyfxDao.selectByExample(example));
     }
 
 
@@ -103,22 +116,36 @@ public class CommonZyfxServiceImpl extends AbstractMyService<Zyfx> implements Co
                 }
             }
         }
+        int addNum = 1;
+        int updateNum = 1;
         if (addList.size()>0){
-            if(commonZyfxDao.batchInsertZyfx(addList)<=0){
-                return 0;
+            int batchSize = 4000;
+            for(int i=0;i<100000;i+=batchSize){
+                if(i+batchSize>=addList.size()){
+                    addNum = commonZyfxDao.batchInsertZyfx(addList.subList(i,addList.size()));
+                    break;
+                }else {
+                    addNum = commonZyfxDao.batchInsertZyfx(addList.subList(i, i+batchSize));
+                }
             }
         }
         if (updateList.size()>0){
-            if(commonZyfxDao.batchUpdateZyfx(updateList)<=0) {
-                return 0;
+            int batchSize = 4000;
+            for(int i=0;i<100000;i+=batchSize){
+                if(i+batchSize>=updateList.size()){
+                    updateNum = commonZyfxDao.batchUpdateZyfx(updateList.subList(i,updateList.size()));
+                    break;
+                }else {
+                    updateNum = commonZyfxDao.batchUpdateZyfx(updateList.subList(i, i+batchSize));
+                }
             }
         }
-        return 1;
+        return 1*addNum*updateNum;
     }
 
 
     @Override
-    public void downloadAllZyfxExcel(String juZhan,HttpServletRequest request, HttpServletResponse response) throws IOException {
+    public void downloadAllZyfxExcel(Zyfx zyfx,HttpServletRequest request, HttpServletResponse response) throws IOException {
 
         /*解决乱码问题，并打开输出流*/
         String fileName = "Zyfx";
@@ -167,7 +194,7 @@ public class CommonZyfxServiceImpl extends AbstractMyService<Zyfx> implements Co
         //准备数据
         //先将报名表里所有活动id为eventId的记录的学生id和报名时间查出
         Example example = new Example(Zyfx.class);
-        example.createCriteria().andEqualTo("juZhan",juZhan);
+        example.createCriteria().andEqualTo("juZhan",zyfx.getJuZhan());
         List<Zyfx> zyfxList = commonZyfxDao.selectByExample(example);
         if (zyfxList.size() > 0) {
             //将数据装填进表格中
@@ -212,11 +239,147 @@ public class CommonZyfxServiceImpl extends AbstractMyService<Zyfx> implements Co
                     }
                 }
             }
+            DateFormat format = new SimpleDateFormat("yyyyMMdd_HH_mm_ss");
+            //输出Excel文件1
+            FileOutputStream output=new FileOutputStream("E:\\work\\excelUnicom\\"+zyfx.getJuZhan().substring(8)+format.format(new Date())+".xls");
+            wb.write(output);//写入磁盘
+            output.close();
             //写出excel文件
             wb.write(out);
             out.close();
         }
     }
 
+    @Override
+    public ZyfxTree selectZyfxTreeByJf(Zyfx zyfx) {
+        ZyfxTree zyfxTree = new ZyfxTree();
+        Example example = new Example(Zyfx.class);
+        example.createCriteria().andEqualTo("juZhan",zyfx.getJuZhan()).andEqualTo("sheBeiMingCheng",zyfx.getSheBeiMingCheng());
+        List<Zyfx> zyfxList = zyfxDao.selectByExample(example);
+        zyfxTree.setSbmc(zyfx.getSheBeiMingCheng());
+        zyfxTree.setJuZhan(zyfx.getJuZhan());
+        List<MoKuai> moKuais = new ArrayList<>();
+        // list 分组
+        Map<String, List<Zyfx>> groupByMk = zyfxList.stream().collect(Collectors.groupingBy(Zyfx::getMoKuaiMing));
+        for (String mk:groupByMk.keySet()
+        ) {
+            moKuais.add(new MoKuai(mk,groupByMk.get(mk)));
+        }
+        zyfxTree.setChildren(moKuais);
+        return zyfxTree;
+    }
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public Integer updateStatisticsZyfx() {
+        Example example = new Example(Zyfx.class);
+        example.createCriteria().andEqualTo("zhuangTai","在用");
+        List<Zyfx> zaiYongZyfx = zyfxDao.selectByExample(example);
+        List<StatisticsZyfx> statisticsZyfxes = new ArrayList<>();
+        Map<String, List<Zyfx>> groupByJz = zaiYongZyfx.stream().collect(Collectors.groupingBy(Zyfx::getJuZhan));
+        for (String jz:groupByJz.keySet()
+        ) {
+            Map<String, List<Zyfx>> groupByZy = groupByJz.get(jz).stream().collect(Collectors.groupingBy(Zyfx::getZhuanYe));
+            StatisticsZyfx statisticsZyfx =new StatisticsZyfx();
+            statisticsZyfx.setJuZhan(jz);
+            statisticsZyfx.setDzNumZaiYong(groupByJz.get(jz).size());
+            int unKonw = 0;
+            for (String zy:groupByZy.keySet()){
+                List<Zyfx> templist = groupByZy.get(zy);
+                if (zy.contains("客")){
+                    int notEndNum = (int) templist.stream().filter(z -> (z.getYeWuHao() + z.getYeWuMing()).equals("")).count();
+                    statisticsZyfx.setZhengQiNotEnd(notEndNum);
+                    statisticsZyfx.setZhengQiEnd(templist.size()-notEndNum);
+                }else if (zy.contains("无线")){
+                    int notEndNum = (int) templist.stream().filter(z -> (z.getYeWuMing() + z.getYeWuHao()).equals("")).count();
+                    statisticsZyfx.setWuXianNotEnd(notEndNum);
+                    statisticsZyfx.setWuXianEnd(templist.size()-notEndNum);
+                }else if (zy.contains("接入")) {
+                    int notEndNum = (int) templist.stream().filter(z -> (z.getYeWuMing()).equals("")).count();
+                    statisticsZyfx.setJieRuNotEnd(notEndNum);
+                    statisticsZyfx.setJieRuEnd(templist.size()-notEndNum);
+                }else if (zy.contains("动力")) {
+                    int notEndNum = (int) templist.stream().filter(z -> (z.getBiaoQian()).equals("")).count();
+                    statisticsZyfx.setDongLiNotEnd(notEndNum);
+                    statisticsZyfx.setDongLiEnd(templist.size()-notEndNum);
+                }else if (zy.equals("")||zy.contains("线路")){
+                    unKonw+=templist.size();
+                }
+            }
+            statisticsZyfx.setUnKonw(unKonw);
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd") ;
+            statisticsZyfx.setStatisticsDate(dateFormat.format(new Date()));
+            statisticsZyfxes.add(statisticsZyfx);
+        }
+        List<StatisticsZyfx> addList = new ArrayList<>();
+        List<StatisticsZyfx> updateList = new ArrayList<>();
+        for (StatisticsZyfx s:statisticsZyfxes
+             ) {
+            Example example2 = new Example(StatisticsZyfx.class);
+            example2.createCriteria().andEqualTo("juZhan",s.getJuZhan()).andEqualTo("statisticsDate",s.getStatisticsDate());
+            if(commonStatisticsZyfxDao.selectCountByExample(example2)>0){
+                updateList.add(s);
+            }else {
+                addList.add(s);
+            }
+        }
+        int i = 1;
+        int j = 1;
+        if (addList.size()>0){
+            i = commonStatisticsZyfxDao.batchInsertStatisticsZyfx(addList);
+        }
+        if (updateList.size()>0){
+            j = commonStatisticsZyfxDao.batchUpdateStatisticsZyfx(updateList);
+        }
+        return i*j;
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public Integer updateZyfxByExcel2(MultipartFile file) throws IOException {
+        if(file.isEmpty()){
+            try {
+                throw new Exception("文件不存在！");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        InputStream in =null;
+        try {
+            in = file.getInputStream();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        List<List<Object>> listob = null;
+        List<Object> headers = null;
+        List<Zyfx> addList = new ArrayList<>();
+        try {
+            listob = new ExcelUtil().getBankListByExcel(in,file.getOriginalFilename());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        for (int i = 0; i < listob.size(); i++) {
+            if (i==0){
+                headers = listob.get(0);
+            }else {
+                List<Object> lo = listob.get(i);
+                Zyfx z = ExcelH_For_P.zyfxAddParams(headers,lo);
+                addList.add(z);
+            }
+        }
+        int addNum = 1;
+        if (addList.size()>0){
+            int batchSize = 4000;
+            for(int i=0;i<100000;i+=batchSize){
+                if(i+batchSize>=addList.size()){
+                    addNum = commonZyfxDao.batchInsertZyfx2(addList.subList(i,addList.size()));
+                    break;
+                }else {
+                    addNum = commonZyfxDao.batchInsertZyfx2(addList.subList(i, i+batchSize));
+                }
+            }
+        }
+        return 1*addNum;
+    }
 
 }

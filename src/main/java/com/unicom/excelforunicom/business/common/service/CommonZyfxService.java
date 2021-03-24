@@ -1,6 +1,8 @@
 package com.unicom.excelforunicom.business.common.service;
 
+import com.unicom.excelforunicom.business.common.model.StatisticsZyfx;
 import com.unicom.excelforunicom.business.common.model.Zyfx;
+import com.unicom.excelforunicom.business.common.model.ZyfxTree;
 import com.unicom.excelforunicom.business.common.need.MyService;
 import com.github.pagehelper.PageInfo;
 import org.springframework.web.multipart.MultipartFile;
@@ -27,8 +29,15 @@ public interface CommonZyfxService extends MyService<Zyfx> {
 
     PageInfo<Zyfx> selectAllZyfx(String zyfxName, Integer pageNum, Integer pageSize);
 
+    PageInfo<Zyfx> selectZyfxByJuZhan(String juZhan, Integer pageNum, Integer pageSize);
+
     Integer updateZyfxByExcel(MultipartFile file) throws IOException;
 
-    void downloadAllZyfxExcel(String juZhan, HttpServletRequest request, HttpServletResponse response) throws IOException;
+    void downloadAllZyfxExcel(Zyfx zyfx, HttpServletRequest request, HttpServletResponse response) throws IOException;
 
+    ZyfxTree selectZyfxTreeByJf(Zyfx zyfx);
+
+    Integer updateStatisticsZyfx();
+
+    Integer updateZyfxByExcel2(MultipartFile file) throws IOException;
 }

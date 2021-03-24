@@ -13,10 +13,4 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface TableShard {
 
-    // 要替换的表名
-    String tableName();
-
-    // 对应的分表策略类
-    Class<? extends ModuloTableShardingAlgorithm> shardStrategy();
-
 }

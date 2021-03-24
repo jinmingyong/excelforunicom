@@ -46,28 +46,36 @@ public class ExcelUtil {
         //遍历Excel中所有的sheet
         sheet = work.getSheetAt(0);
         if(sheet==null){return list;}
-
+        row = sheet.getRow(0);
+        int dzmcNum = 0;
+        int jzNum = 0;
+        List<Integer> excelNumList =new ArrayList<>();
+        for (int f = row.getFirstCellNum(); f<row.getLastCellNum(); f++) {
+            cell = row.getCell(f);
+            if (this.getValue(cell).trim().equals("")){
+                continue;
+            }else if (this.getValue(cell).trim().equals("局站")){
+                jzNum = f;
+            }else if (this.getValue(cell).trim().equals("端子名称")){
+                dzmcNum = f;
+            }
+            headerList.add(this.getValue(cell));
+            excelNumList.add(f);
+        }
+        list.add(headerList);
         //遍历当前sheet中的所有行
-        for (int j = sheet.getFirstRowNum(); j <= sheet.getLastRowNum(); j++) {
+        for (int j = sheet.getFirstRowNum()+1; j <= sheet.getLastRowNum(); j++) {
             row = sheet.getRow(j);
-            if(row==null||this.getValue(row.getCell(3)).equals("")){continue;}
+            if(row==null||this.getValue(row.getCell(dzmcNum)).equals("")||this.getValue(row.getCell(jzNum)).equals("")){continue;}
             //遍历所有的列
             List<Object> li = new ArrayList<Object>();
-            if (j == 0){
-                for (int f = row.getFirstCellNum(); f<row.getLastCellNum(); f++) {
-                    cell = row.getCell(f);
-                    headerList.add(this.getValue(cell));
-                }
-                list.add(headerList);
-            }else {
-                for (int y = row.getFirstCellNum(); y < row.getLastCellNum(); y++) {
-                    cell = row.getCell(y);
+            for (Integer cellNum:excelNumList
+                 ) {
+                    cell = row.getCell(cellNum);
                     li.add(this.getValue(cell));
                 }
                 list.add(li);
             }
-        }
-
         return list;
 
     }
@@ -160,6 +168,6 @@ public class ExcelUtil {
         if("null".endsWith(value.trim())){
             value="";
         }
-        return value;
+        return value.trim();
     }
 }

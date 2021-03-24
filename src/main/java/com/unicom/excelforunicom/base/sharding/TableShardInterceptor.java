@@ -43,48 +43,73 @@ public class TableShardInterceptor implements Interceptor {
         );
         MappedStatement mappedStatement = (MappedStatement)
                 metaObject.getValue("delegate.mappedStatement");
-        if (mappedStatement.getSqlCommandType().name().equals("UPDATE")){
-            String id = mappedStatement.getId();
-            id = id.substring(0, id.lastIndexOf('.'));
-            Class clazz = Class.forName(id);
+        String id = mappedStatement.getId();
+        if (id.equals("com.unicom.excelforunicom.business.common.dao.ZyfxDao")){
 
-            // 获取TableShard注解
-            TableShard tableShard = (TableShard)clazz.getAnnotation(TableShard.class);
-            if ( tableShard != null ) {
-                String res = ((String)metaObject.getValue("delegate.boundSql.sql"));
-                List<String> sqls = Arrays.asList(res.split(";"));
-                Map a = (Map) statementHandler.getParameterHandler().getParameterObject();
-                List<Zyfx> zyfxList= (List<Zyfx>) a.get("param1");
-                String resSql = "";
-                for (int i = 0; i < sqls.size(); i++) {
-                    String str = "";
-                    if (zyfxList.get(i).getJuZhan().equals("TJ天津市南开区西姜井局站")) {
-                        str = "zyfx_xjj";
-                        resSql += sqls.get(i).replace("zyfx",str)+";";
-                    } else if (zyfxList.get(i).getJuZhan().equals("TJ天津市南开区澄江路设备间")) {
-                        str = "zyfx_cjl";
-                        resSql += sqls.get(i).replace("zyfx",str)+";";
-                    } else if (zyfxList.get(i).getJuZhan().equals("TJ天津市南开区五金城设备间")){
-                        str = "zyfx_wjc";
-                        resSql += sqls.get(i).replace("zyfx",str)+";";
-                    }else if (zyfxList.get(i).getJuZhan().equals("TJ天津市南开区北草坝设备间")){
-                        str = "zyfx_bcb";
-                        resSql += sqls.get(i).replace("zyfx",str)+";";
-                    }else if (zyfxList.get(i).getJuZhan().equals("TJ天津市南开区鸿运小区设备间")){
-                        str = "zyfx_hy";
-                        resSql += sqls.get(i).replace("zyfx",str)+";";
-                    }else if (zyfxList.get(i).getJuZhan().equals("TJ天津市南开区大园新居设备间")){
-                        str = "zyfx_dyxj";
-                        resSql += sqls.get(i).replace("zyfx",str)+";";
-                    }else if (zyfxList.get(i).getJuZhan().equals("TJ天津市南开区美丽心殿设备间")){
-                        str = "zyfx_mlxd";
-                        resSql += sqls.get(i).replace("zyfx",str)+";";
+        }else {
+            if (id.substring(id.lastIndexOf('.')+1).equals("batchUpdateZyfx")){
+                id = id.substring(0, id.lastIndexOf('.'));
+                Class clazz = Class.forName(id);
+
+                // 获取TableShard注解
+                TableShard tableShard = (TableShard)clazz.getAnnotation(TableShard.class);
+                if ( tableShard != null ) {
+                    String res = ((String)metaObject.getValue("delegate.boundSql.sql"));
+                    List<String> sqls = Arrays.asList(res.split(";"));
+                    Map a = (Map) statementHandler.getParameterHandler().getParameterObject();
+                    List<Zyfx> zyfxList= (List<Zyfx>) a.get("param1");
+                    String resSql = "";
+                    for (int i = 0; i < sqls.size(); i++) {
+                        String str = "";
+                        switch (zyfxList.get(i).getJuZhan()) {
+                            case "TJ天津市南开区西姜井局站":
+                                str = "zyfx_xjj";
+                                resSql += sqls.get(i).replace("zyfx", str) + ";";
+                                break;
+                            case "TJ天津市南开区澄江路设备间":
+                                str = "zyfx_cjl";
+                                resSql += sqls.get(i).replace("zyfx", str) + ";";
+                                break;
+                            case "TJ天津市南开区五金城设备间":
+                                str = "zyfx_wjc";
+                                resSql += sqls.get(i).replace("zyfx", str) + ";";
+                                break;
+                            case "TJ天津市南开区北草坝设备间":
+                                str = "zyfx_bcb";
+                                resSql += sqls.get(i).replace("zyfx", str) + ";";
+                                break;
+                            case "TJ天津市南开区鸿运小区设备间":
+                                str = "zyfx_hy";
+                                resSql += sqls.get(i).replace("zyfx", str) + ";";
+                                break;
+                            case "TJ天津市南开区大园新居设备间":
+                                str = "zyfx_dyxj";
+                                resSql += sqls.get(i).replace("zyfx", str) + ";";
+                                break;
+                            case "TJ天津市南开区美丽心殿设备间":
+                                str = "zyfx_mlxd";
+                                resSql += sqls.get(i).replace("zyfx", str) + ";";
+                                break;
+                            case "TJ天津市南开区西营门局站":
+                                str = "zyfx_xym";
+                                resSql += sqls.get(i).replace("zyfx", str) + ";";
+                                break;
+                            case "TJ天津市南开区王顶堤局站":
+                                str = "zyfx_wdd";
+                                resSql += sqls.get(i).replace("zyfx", str) + ";";
+                                break;
+                            case "TJ天津市南开区南丰桥局站":
+                                str = "zyfx_nfq";
+                                resSql += sqls.get(i).replace("zyfx", str) + ";";
+                                break;
+                        }
                     }
+                    // 用新sql代替旧sql, 完成所谓的sql rewrite
+                    metaObject.setValue("delegate.boundSql.sql", resSql);
                 }
-                // 用新sql代替旧sql, 完成所谓的sql rewrite
-                metaObject.setValue("delegate.boundSql.sql", resSql);
             }
         }
+
 
         // 传递给下一个拦截器处理
         return invocation.proceed();

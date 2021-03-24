@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="mapper.StatisticsZyfxMapper">
+  <resultMap id="BaseResultMap" type="com.unicom.excelforunicom.business.common.model.StatisticsZyfx">
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <id column="juZhan" jdbcType="VARCHAR" property="juzhan" />
+    <result column="dzNumZaiYong" jdbcType="INTEGER" property="dznumzaiyong" />
+    <result column="zhengQiEnd" jdbcType="INTEGER" property="zhengqiend" />
+    <result column="wuXianEnd" jdbcType="INTEGER" property="wuxianend" />
+    <result column="jieRuEnd" jdbcType="INTEGER" property="jieruend" />
+    <result column="dongLiEnd" jdbcType="INTEGER" property="dongliend" />
+    <result column="zhengQiNotEnd" jdbcType="INTEGER" property="zhengqinotend" />
+    <result column="wuXianNotEnd" jdbcType="INTEGER" property="wuxiannotend" />
+    <result column="jieRuNotEnd" jdbcType="INTEGER" property="jierunotend" />
+    <result column="dongLiNotEnd" jdbcType="INTEGER" property="donglinotend" />
+    <result column="unKonw" jdbcType="INTEGER" property="unkonw" />
+    <result column="statisticsDate" jdbcType="VARCHAR" property="statisticsdate" />
+  </resultMap>
+</mapper>

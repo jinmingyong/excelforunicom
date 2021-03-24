@@ -77,6 +77,19 @@ public class CommonZyfxController {
         pageUtil.setTotalPage(pageInfo.getPages());
         return Result.result(pageUtil);
     }
+    @ApiOperation(value = "分页查询根据局站")
+    @GetMapping("selectZyfxByJuZhan")
+    public Result selectZyfxByJuZhan(@RequestParam Integer pageNum, @RequestParam Integer pageSize,@RequestParam String juZhan) {
+        PageUtils pageUtil = new PageUtils();
+        PageInfo<Zyfx> pageInfo =commonZyfxService.selectZyfxByJuZhan(juZhan,pageNum,pageSize);
+        pageUtil.setDataList(pageInfo.getList());
+        pageUtil.setCurrentPage(pageNum);
+        pageUtil.setPageSizes(pageSize);
+        pageUtil.setTotal((int) pageInfo.getTotal());
+        pageUtil.setTotalPage(pageInfo.getPages());
+        return Result.result(pageUtil);
+    }
+
     @ApiOperation(value = "excel更新")
     @PostMapping("updateZyfxByExcel")
     public Result updateZyfxByExcel(@RequestParam("file") MultipartFile file) throws Exception {
@@ -84,8 +97,27 @@ public class CommonZyfxController {
     }
 
     @ApiOperation(value = "下载报表")
-    @GetMapping("downloadAllZyfxExcel")
-    public void downloadAllZyfxExcel(String downloadJuzhan, HttpServletRequest request, HttpServletResponse response) throws Exception {
-        commonZyfxService.downloadAllZyfxExcel(downloadJuzhan,request,response);
+    @PostMapping("downloadAllZyfxExcel")
+    public void downloadAllZyfxExcel(@RequestBody Zyfx zyfx, HttpServletRequest request, HttpServletResponse response) throws Exception {
+        commonZyfxService.downloadAllZyfxExcel(zyfx,request,response);
     }
+    @ApiOperation(value = "树")
+    @PostMapping("selectZyfxTreeByJf")
+    public Result selectZyfxTreeByJf(@RequestBody Zyfx zyfx) {
+        return Result.result(commonZyfxService.selectZyfxTreeByJf(zyfx));
+    }
+
+    @ApiOperation(value = "统计在用")
+    @GetMapping("updateStatisticsZyfx")
+    public Result updateStatisticsZyfx() {
+        return Result.result(commonZyfxService.updateStatisticsZyfx());
+    }
+
+    @ApiOperation(value = "excel更新2")
+    @PostMapping("updateZyfxByExcel2")
+    public Result updateZyfxByExcel2(@RequestParam("file") MultipartFile file) throws Exception {
+        return Result.result(commonZyfxService.updateZyfxByExcel2(file),"更新成功","更新失败");
+    }
+
+
 }
