@@ -37,7 +37,9 @@ public interface CommonZyfxService extends MyService<Zyfx> {
 
     ZyfxTree selectZyfxTreeByJf(Zyfx zyfx);
 
-    Integer updateStatisticsZyfx();
+    List<Zyfx> updateStatisticsZyfx();
+
+    void downloadNotEndZyfx(HttpServletRequest request, HttpServletResponse response) throws IOException;
 
     Integer updateZyfxByExcel2(MultipartFile file) throws IOException;
 }

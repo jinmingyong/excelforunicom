@@ -14,6 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 
 
 /**
@@ -100,6 +101,11 @@ public class CommonZyfxController {
     @PostMapping("downloadAllZyfxExcel")
     public void downloadAllZyfxExcel(@RequestBody Zyfx zyfx, HttpServletRequest request, HttpServletResponse response) throws Exception {
         commonZyfxService.downloadAllZyfxExcel(zyfx,request,response);
+    }
+    @ApiOperation(value = "下载未完成报表")
+    @PostMapping("downloadNotEndZyfx")
+    public void downloadNotEndZyfx(HttpServletRequest request, HttpServletResponse response) throws Exception {
+        commonZyfxService.downloadNotEndZyfx(request,response);
     }
     @ApiOperation(value = "树")
     @PostMapping("selectZyfxTreeByJf")

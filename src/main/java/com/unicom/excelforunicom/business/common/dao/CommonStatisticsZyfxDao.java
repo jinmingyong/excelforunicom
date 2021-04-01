@@ -29,6 +29,7 @@ public interface CommonStatisticsZyfxDao extends MyMapper<StatisticsZyfx> {
             "statistics.wuXianNotEnd,\n" +
             "statistics.jieRuNotEnd,\n" +
             "statistics.dongLiNotEnd,\n" +
+            "statistics.xianLuNotEnd,\n" +
             "statistics.unKonw,\n" +
             "statistics.statisticsDate\n" +
             "FROM\n" +
@@ -51,6 +52,7 @@ public interface CommonStatisticsZyfxDao extends MyMapper<StatisticsZyfx> {
             "wuXianNotEnd,\n" +
             "jieRuNotEnd,\n" +
             "dongLiNotEnd,\n" +
+            "xianLuNotEnd,\n" +
             "unKonw," +
             "statisticsDate)" +
             "values" +
@@ -66,6 +68,7 @@ public interface CommonStatisticsZyfxDao extends MyMapper<StatisticsZyfx> {
             "#{item.wuXianNotEnd}," +
             "#{item.jieRuNotEnd}," +
             "#{item.dongLiNotEnd}," +
+            "#{item.xianLuNotEnd}," +
             "#{item.unKonw}," +
             "#{item.statisticsDate})" +
             "</foreach>" +
@@ -102,6 +105,9 @@ public interface CommonStatisticsZyfxDao extends MyMapper<StatisticsZyfx> {
             "</if>"+
             "<if test=\" item.dongLiNotEnd!=null \" >"+
             "dongLiNotEnd = #{item.dongLiNotEnd}," +
+            "</if>"+
+            "<if test=\" item.xianLuNotEnd!=null \" >"+
+            "xianLuNotEnd = #{item.xianLuNotEnd}," +
             "</if>"+
             "<if test=\" item.unKonw!=null \" >"+
             "unKonw = #{item.unKonw}," +

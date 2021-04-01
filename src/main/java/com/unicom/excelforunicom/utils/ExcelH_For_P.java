@@ -158,6 +158,19 @@ public class ExcelH_For_P {
             }
             return String.join("/",dzmcs2);
         }
+        else if(dzmc.matches("^([0-9]{1,}|[^\\x00-\\xff]+[0-9]{1,})-[0-9]{1,}-[0-9]{1,}-[0-9]{1,}")){
+            List<String> d = Arrays.asList(dzmc.split("-"));
+            for (int i = 0 ;i<d.size();i++) {
+                if (i == 2){
+                    int num = (int) Math.ceil(((Double.valueOf(d.get(i)))/6.0));
+                    int num2 = (Integer.valueOf(d.get(i)) %6);
+                    d.set(i,"M"+StringUtils.add0(num+"")+"-"+StringUtils.add0((num2==0?6:num2)+""));
+                    continue;
+                }
+                d.set(i,StringUtils.add0(d.get(i)));
+            }
+            return String.join("-",d);
+        }
         return dzmc;
     }
 }

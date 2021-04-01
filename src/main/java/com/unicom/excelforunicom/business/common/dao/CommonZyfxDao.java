@@ -1,8 +1,6 @@
 package com.unicom.excelforunicom.business.common.dao;
 
-import com.unicom.excelforunicom.base.sharding.ModuloTableShardingAlgorithm;
 import com.unicom.excelforunicom.base.sharding.TableShard;
-import com.unicom.excelforunicom.base.sharding.TableShardInterceptor;
 import com.unicom.excelforunicom.business.common.model.Zyfx;
 import com.unicom.excelforunicom.business.common.need.MyMapper;
 import org.apache.ibatis.annotations.Insert;

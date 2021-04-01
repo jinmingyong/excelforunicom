@@ -48,6 +48,9 @@ public class StatisticsZyfx {
    	@Column(name = "dongLiNotEnd" )
 	private Integer dongLiNotEnd = 0;
 
+	@Column(name = "xianLuNotEnd" )
+	private Integer xianLuNotEnd = 0;
+
    	@Column(name = "unKonw" )
 	private Integer unKonw = 0;
 

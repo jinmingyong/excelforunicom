@@ -26,13 +26,11 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -48,6 +46,8 @@ public class CommonZyfxServiceImpl extends AbstractMyService<Zyfx> implements Co
     private ZyfxDao zyfxDao;
     @Autowired
     private ZyfxExcelTitle zyfxExcelTitle;
+    @Autowired
+    private ZyfxJhExcelTitle zyfxJhExcelTitle;
     @Autowired
     private CommonStatisticsZyfxDao commonStatisticsZyfxDao;
 
@@ -268,14 +268,105 @@ public class CommonZyfxServiceImpl extends AbstractMyService<Zyfx> implements Co
         zyfxTree.setChildren(moKuais);
         return zyfxTree;
     }
+    @Override
+    public void downloadNotEndZyfx(HttpServletRequest request, HttpServletResponse response) throws IOException{
+        /*解决乱码问题，并打开输出流*/
+        String fileName = "Zyfx";
+        String userAgent = request.getHeader("User-Agent");
+        boolean isMSIE = userAgent != null && (userAgent.indexOf("MSIE") > -1 || userAgent.indexOf("like Gecko") > -1);
+        if (isMSIE) {
+            fileName = URLEncoder.encode(fileName, "UTF8");
+        } else {
+            fileName = new String(fileName.getBytes("gbk"), "ISO8859-1");
+        }
+        // 设置强制下载不打开
+        response.setContentType("application/octet-stream");
+        // 设置文件名
+        response.setHeader("Content-Disposition", "attachment;fileName=" + fileName + ".xls");
+        ServletOutputStream out = response.getOutputStream();
+        //从配置文件中获取表头信息
+        List<String> list = zyfxJhExcelTitle.getExcelTitle();
+        //绘制表格
+        HSSFWorkbook wb = new HSSFWorkbook();
+        HSSFSheet sheetlist = wb.createSheet("资源分析");
+
+        //设置列宽
+        for (int i = 0; i < list.size(); i++) {
+            if(i == 4 || i == 5 || i == 7) {
+                sheetlist.setColumnWidth(i, 6050);
+            }else{
+                sheetlist.setColumnWidth(i, 3766);
+            }
+        }
+        //表头格式
+        HSSFCellStyle cellStyle = wb.createCellStyle();
+        cellStyle.setAlignment(HSSFCellStyle.ALIGN_CENTER);
+        cellStyle.setBorderTop(HSSFCellStyle.BORDER_THIN);
+        cellStyle.setBorderLeft(HSSFCellStyle.BORDER_THIN);
+        cellStyle.setBorderRight(HSSFCellStyle.BORDER_THIN);
+        cellStyle.setBorderBottom(HSSFCellStyle.BORDER_THIN);
+        cellStyle.setFillForegroundColor(IndexedColors.LIGHT_BLUE.getIndex());
+        cellStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+        //表格格式（只加边框）
+        HSSFCellStyle cellStyle2 = wb.createCellStyle();
+        cellStyle2.setAlignment(HSSFCellStyle.ALIGN_CENTER);
+        cellStyle2.setBorderTop(HSSFCellStyle.BORDER_THIN);
+        cellStyle2.setBorderLeft(HSSFCellStyle.BORDER_THIN);
+        cellStyle2.setBorderRight(HSSFCellStyle.BORDER_THIN);
+        cellStyle2.setBorderBottom(HSSFCellStyle.BORDER_THIN);
+        //准备数据
+        List<Zyfx> notEndZyfxList = updateStatisticsZyfx();
+        //先将报名表里所有活动id为eventId的记录的学生id和报名时间查出
+        if (notEndZyfxList.size() > 0) {
+            //将数据装填进表格中
+            for (int i = 0; i < notEndZyfxList.size()+1; i++) {
+                HSSFRow row = sheetlist.createRow(i);
+                if (i == 0) {
+                    for (int j = 0; j < list.size(); j++) {
+                        HSSFCell cell = row.createCell(j);
+                        cell.setCellValue(list.get(j));
+                        cell.setCellStyle(cellStyle);
+                    }
+                } else {
+                    row.createCell(0).setCellValue(notEndZyfxList.get(i-1).getDuanZiMingCheng());
+                    row.createCell(1).setCellValue(notEndZyfxList.get(i-1).getZhuangTai());
+                    row.createCell(2).setCellValue(notEndZyfxList.get(i-1).getZhuanYe());
+                    row.createCell(3).setCellValue(notEndZyfxList.get(i-1).getYeWuLeiBie());
+                    row.createCell(4).setCellValue(notEndZyfxList.get(i-1).getYeWuHao());
+                    row.createCell(5).setCellValue(notEndZyfxList.get(i-1).getYeWuMing());
+                    row.createCell(6).setCellValue(notEndZyfxList.get(i-1).getBiaoQian());
+                    row.createCell(7).setCellValue(notEndZyfxList.get(i-1).getDuiYingWeizhi());
+                    row.createCell(8).setCellValue(notEndZyfxList.get(i-1).getTiaoJieWeizhi());
+                    row.createCell(10).setCellValue(notEndZyfxList.get(i-1).getJuZhan());
+                    Date createTime = notEndZyfxList.get(i - 1).getBianGengRiQi();
+                    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd") ;
+                    if(createTime != null){
+                        String time = dateFormat.format(createTime);
+                        row.createCell(9).setCellValue(time);
+                    }else{
+                        row.createCell(9).setCellValue("");
+                    }
+                }
+            }
+            DateFormat format = new SimpleDateFormat("yyyyMMdd_HH_mm_ss");
+            //输出Excel文件1
+            FileOutputStream output=new FileOutputStream("E:\\work\\excelUnicom2\\"+"资源计划"+format.format(new Date())+".xls");
+            wb.write(output);//写入磁盘
+            output.close();
+            //写出excel文件
+            wb.write(out);
+            out.close();
+        }
+    }
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public Integer updateStatisticsZyfx() {
+    public List<Zyfx> updateStatisticsZyfx(){
         Example example = new Example(Zyfx.class);
         example.createCriteria().andEqualTo("zhuangTai","在用");
         List<Zyfx> zaiYongZyfx = zyfxDao.selectByExample(example);
         List<StatisticsZyfx> statisticsZyfxes = new ArrayList<>();
         Map<String, List<Zyfx>> groupByJz = zaiYongZyfx.stream().collect(Collectors.groupingBy(Zyfx::getJuZhan));
+        List<Zyfx> notEndZyfxList = new ArrayList<>();
         for (String jz:groupByJz.keySet()
         ) {
             Map<String, List<Zyfx>> groupByZy = groupByJz.get(jz).stream().collect(Collectors.groupingBy(Zyfx::getZhuanYe));
@@ -285,24 +376,36 @@ public class CommonZyfxServiceImpl extends AbstractMyService<Zyfx> implements Co
             int unKonw = 0;
             for (String zy:groupByZy.keySet()){
                 List<Zyfx> templist = groupByZy.get(zy);
-                if (zy.contains("客")){
-                    int notEndNum = (int) templist.stream().filter(z -> (z.getYeWuHao() + z.getYeWuMing()).equals("")).count();
+                if (zy.contains("政企")){
+                    List<Zyfx> notEndZyfxs = templist.stream().filter(z -> (z.getYeWuHao() + z.getYeWuMing()).equals("")).collect(Collectors.toList());
+                    int notEndNum = notEndZyfxs.size();
                     statisticsZyfx.setZhengQiNotEnd(notEndNum);
                     statisticsZyfx.setZhengQiEnd(templist.size()-notEndNum);
+                    notEndZyfxList.addAll(notEndZyfxs);
                 }else if (zy.contains("无线")){
-                    int notEndNum = (int) templist.stream().filter(z -> (z.getYeWuMing() + z.getYeWuHao()).equals("")).count();
+                    List<Zyfx> notEndZyfxs = templist.stream().filter(z -> (z.getYeWuMing() + z.getYeWuHao()).equals("")).collect(Collectors.toList());
+                    int notEndNum = notEndZyfxs.size();
                     statisticsZyfx.setWuXianNotEnd(notEndNum);
                     statisticsZyfx.setWuXianEnd(templist.size()-notEndNum);
+                    notEndZyfxList.addAll(notEndZyfxs);
                 }else if (zy.contains("接入")) {
-                    int notEndNum = (int) templist.stream().filter(z -> (z.getYeWuMing()).equals("")).count();
+                    List<Zyfx> notEndZyfxs = templist.stream().filter(z -> (z.getYeWuMing()).equals("")).collect(Collectors.toList());
+                    int notEndNum = notEndZyfxs.size();
                     statisticsZyfx.setJieRuNotEnd(notEndNum);
                     statisticsZyfx.setJieRuEnd(templist.size()-notEndNum);
+                    notEndZyfxList.addAll(notEndZyfxs);
                 }else if (zy.contains("动力")) {
-                    int notEndNum = (int) templist.stream().filter(z -> (z.getBiaoQian()).equals("")).count();
+                    List<Zyfx> notEndZyfxs = templist.stream().filter(z -> (z.getBiaoQian()).equals("")).collect(Collectors.toList());
+                    int notEndNum = notEndZyfxs.size();
                     statisticsZyfx.setDongLiNotEnd(notEndNum);
                     statisticsZyfx.setDongLiEnd(templist.size()-notEndNum);
-                }else if (zy.equals("")||zy.contains("线路")){
-                    unKonw+=templist.size();
+                    notEndZyfxList.addAll(notEndZyfxs);
+                }else if (zy.equals("")){
+                    notEndZyfxList.addAll(templist);
+                    unKonw=templist.size();
+                }else if (zy.contains("线路")) {
+                    notEndZyfxList.addAll(templist);
+                    statisticsZyfx.setXianLuNotEnd(templist.size());
                 }
             }
             statisticsZyfx.setUnKonw(unKonw);
@@ -322,15 +425,13 @@ public class CommonZyfxServiceImpl extends AbstractMyService<Zyfx> implements Co
                 addList.add(s);
             }
         }
-        int i = 1;
-        int j = 1;
         if (addList.size()>0){
-            i = commonStatisticsZyfxDao.batchInsertStatisticsZyfx(addList);
+           commonStatisticsZyfxDao.batchInsertStatisticsZyfx(addList);
         }
         if (updateList.size()>0){
-            j = commonStatisticsZyfxDao.batchUpdateStatisticsZyfx(updateList);
+            commonStatisticsZyfxDao.batchUpdateStatisticsZyfx(updateList);
         }
-        return i*j;
+        return notEndZyfxList;
     }
 
     @Transactional(rollbackFor = Exception.class)
