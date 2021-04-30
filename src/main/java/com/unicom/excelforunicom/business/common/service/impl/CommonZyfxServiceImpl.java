@@ -1,5 +1,7 @@
 package com.unicom.excelforunicom.business.common.service.impl;
 
+import com.spire.xls.Workbook;
+import com.spire.xls.Worksheet;
 import com.unicom.excelforunicom.business.common.dao.CommonStatisticsZyfxDao;
 import com.unicom.excelforunicom.business.common.dao.CommonZyfxDao;
 import com.unicom.excelforunicom.business.common.dao.ZyfxDao;
@@ -11,6 +13,7 @@ import com.unicom.excelforunicom.utils.ExcelUtil;
 import org.apache.poi.hssf.usermodel.*;
 import org.apache.poi.ss.usermodel.FillPatternType;
 import org.apache.poi.ss.usermodel.IndexedColors;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.github.pagehelper.PageHelper;
@@ -23,10 +26,7 @@ import javax.annotation.Resource;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.net.URLEncoder;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -167,6 +167,7 @@ public class CommonZyfxServiceImpl extends AbstractMyService<Zyfx> implements Co
         HSSFWorkbook wb = new HSSFWorkbook();
         HSSFSheet sheetlist = wb.createSheet("资源分析");
 
+
         //设置列宽
         for (int i = 0; i < list.size(); i++) {
             if(i == 4 || i == 5 || i == 7) {
@@ -240,13 +241,27 @@ public class CommonZyfxServiceImpl extends AbstractMyService<Zyfx> implements Co
                 }
             }
             DateFormat format = new SimpleDateFormat("yyyyMMdd_HH_mm_ss");
+            String newFilename = zyfx.getJuZhan().substring(8)+format.format(new Date());
             //输出Excel文件1
-            FileOutputStream output=new FileOutputStream("E:\\work\\excelUnicom\\"+zyfx.getJuZhan().substring(8)+format.format(new Date())+".xls");
+            FileOutputStream output=new FileOutputStream("E:\\work\\excelUnicom\\"+newFilename+".xls");
             wb.write(output);//写入磁盘
             output.close();
             //写出excel文件
             wb.write(out);
             out.close();
+            Workbook workbook = new Workbook();
+            Workbook workbook2 = new Workbook();
+            workbook.loadFromFile("E:\\work\\excelUnicom\\"+newFilename+".xls");
+            workbook.createEmptySheet("sheet1");
+            workbook.createEmptySheet("sheet2");
+            workbook2.loadFromFile("E:\\work\\excelUnicom\\模板.xls");
+            Worksheet sheet1 = workbook.getWorksheets().get(1);
+            Worksheet sheet2 = workbook.getWorksheets().get(2);
+            Worksheet worksheet1 = workbook2.getWorksheets().get(1);
+            Worksheet worksheet2 = workbook2.getWorksheets().get(2);
+            sheet1.copyFrom(worksheet1);
+            sheet2.copyFrom(worksheet2);
+            workbook.save();
         }
     }
 

@@ -213,9 +213,6 @@ public interface CommonZyfxDao extends MyMapper<Zyfx> {
             "</if>"+"<if test=\"item.biaoQian!=null \" >"+
             "biaoQian = #{item.biaoQian}," +
             "</if>"+
-            "<if test=\"item.duiYingWeizhi!=null \" >"+
-            "duiYingWeizhi = #{item.duiYingWeizhi}," +
-            "</if>"+
             "<if test=\" item.tiaoJieWeizhi!=null \" >"+
             "tiaoJieWeizhi = #{item.tiaoJieWeizhi}," +
             "</if>"+
